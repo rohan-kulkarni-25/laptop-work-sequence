@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Working with Laptop - Video Sequence</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-frame {
+            width: 100%;
+            border-radius: 5px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background-color: #005fa3;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 4px;
+            margin: 15px 0;
+            height: 8px;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #0078d7;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.2s;
+        }
+        
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .loading {
+            margin: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Professional Working with Laptop</h1>
+    <p>5-second sequence at 5 frames per second (25 frames total)</p>
+    
+    <div class="video-container">
+        <img id="videoFrame" class="video-frame" src="" alt="Video Frame">
+        
+        <div class="info">
+            <span id="currentFrame">Frame: 0/25</span>
+            <span id="currentTime">Time: 0.0s</span>
+        </div>
+        
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="playBtn">Play</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="restartBtn">Restart</button>
+    </div>
+    
+    <div id="loading" class="loading">Loading frames...</div>
+    
+    <script>
+        // Array of all image URLs
+        const frameUrls = [
+            "https://fal.media/files/penguin/7ZiiF0rrEF-ne1hLYffBJ_dd55bc4c5fcf4622b134450a6a366de7.jpg",
+            "https://fal.media/files/kangaroo/gvzTqRn4NPBRGaWAUu6E1_0a4bb746b6ca41b58e64d7c1b0584567.jpg",
+            "https://fal.media/files/rabbit/eisDzdanpjEzX8j6T-MLG_b1451bb778ef42c5bac1930eb7e127ce.jpg",
+            "https://fal.media/files/zebra/4I8aLHS7Qx5amxeY_XIBi_1b514189c7d24bfeb5861e9c914cb9d7.jpg",
+            "https://fal.media/files/zebra/MV-biEmF2qZw3AYOlxmO3_f47f29a17f684a6199e0d44f7e63c70b.jpg",
+            "https://fal.media/files/lion/sR69VVfBS2XRjBL-VIn32_cd5a44af38634b66a5b957f7b774198d.jpg",
+            "https://fal.media/files/panda/cqoAxWaufcvOXLb-ZoX0k_54078a629b154c4d8b893bb624453ca8.jpg",
+            "https://fal.media/files/kangaroo/ac7LkKgcVojAxV4ytUzL1_0ed43c485cae40afa8d69c214014b55d.jpg",
+            "https://fal.media/files/penguin/IeuZ1eJ9CGMnZ20bN_WuX_84c8e5a636484ca1b47e35ab728d082e.jpg",
+            "https://fal.media/files/monkey/huuEb9LCpf8K164rmFZo6_c7080128119d4794ae6dbcf6c9e4301f.jpg",
+            "https://fal.media/files/zebra/0pPepKrzER5I8upsYlFXk_c238724acfbf4cf285aa485cd549d796.jpg",
+            "https://fal.media/files/elephant/gq_sNxFcn0-hfBBSjlC37_5bb29bce6e1c41bab3ac1bc34b2923e6.jpg",
+            "https://fal.media/files/zebra/1344T9t1ZZ4-Nrp_ueMWz_66f3193abbb74305a9bbff5a95295867.jpg",
+            "https://fal.media/files/monkey/hrsJAG1VCblr2w1i7xcwh_27cf8030cebe4227a09d3a2cec44b2e5.jpg",
+            "https://fal.media/files/panda/s2e_AO1hUUcJ2dkOdgcDT_385c0e2b13474b5ba2f941aa70f703d5.jpg",
+            "https://fal.media/files/monkey/sjjgGssY1OyEto_S_R_z1_c361f881ecd64bd2a59c31e8236b9612.jpg",
+            "https://fal.media/files/penguin/mbgsjbxH5-kKINpS969Op_0ecc7dbd7c6049d19f03b9069b4314be.jpg",
+            "https://fal.media/files/elephant/V_hGHHQ8DQD0j3hnr-PW8_ecceb7af8263438f9c4bc563ab9cb5c0.jpg",
+            "https://fal.media/files/kangaroo/7X3tKkh2UTUXwVzmtXsJF_1ce781d5ad154ec2904b9f9745278fc5.jpg",
+            "https://fal.media/files/monkey/trGgLPTYcLjb7JEz6GTsV_886ab85ea5c54e79864a90db9998a936.jpg",
+            "https://fal.media/files/tiger/NDLJiji9oxOL02dPVCyt7_53a9229bc32a4ea19aad0644909a58f8.jpg",
+            "https://fal.media/files/kangaroo/XVL_9O3jwpFtMRx02u9gZ_7b7fe717755e4f289dd8a5980113fdd7.jpg",
+            "https://fal.media/files/zebra/MSUNoZw60Mce8bVVcBbLv_5d97f109cde244d5b256553183454c1a.jpg",
+            "https://fal.media/files/tiger/cOwVUbvZAvLFhFFBdjBpA_841d6592f5a04a9b96055ab2cb8eb5f2.jpg",
+            "https://fal.media/files/zebra/mDY0RoBMyuNd1TDjpFDgh_520d0f54a722434aaac81cb3d0c91446.jpg"
+        ];
+        
+        // DOM elements
+        const videoFrame = document.getElementById('videoFrame');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const currentFrameDisplay = document.getElementById('currentFrame');
+        const currentTimeDisplay = document.getElementById('currentTime');
+        const progressBar = document.getElementById('progress');
+        const loadingMessage = document.getElementById('loading');
+        
+        // Video parameters
+        const fps = 5; // 5 frames per second
+        const frameDuration = 1000 / fps; // Duration of each frame in ms
+        
+        // State variables
+        let currentFrameIndex = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        let loadedImages = 0;
+        
+        // Preload all images
+        function preloadImages() {
+            frameUrls.forEach((url, index) => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedImages++;
+                    if (loadedImages === frameUrls.length) {
+                        // All images loaded
+                        loadingMessage.textContent = "All frames loaded successfully!";
+                        setTimeout(() => {
+                            loadingMessage.style.display = 'none';
+                        }, 1500);
+                        
+                        // Show the first frame
+                        displayFrame(0);
+                    } else {
+                        loadingMessage.textContent = `Loading frames... ${loadedImages}/${frameUrls.length}`;
+                    }
+                };
+                img.onerror = () => {
+                    loadingMessage.textContent = `Error loading frame ${index + 1}. Please check the URL.`;
+                };
+                img.src = url;
+            });
+        }
+        
+        // Display a specific frame
+        function displayFrame(index) {
+            if (index >= 0 && index < frameUrls.length) {
+                videoFrame.src = frameUrls[index];
+                currentFrameIndex = index;
+                
+                // Update UI elements
+                currentFrameDisplay.textContent = `Frame: ${index + 1}/${frameUrls.length}`;
+                currentTimeDisplay.textContent = `Time: ${((index + 1) / fps).toFixed(1)}s`;
+                
+                // Update progress bar
+                const progressPercent = ((index + 1) / frameUrls.length) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+            }
+        }
+        
+        // Play the sequence
+        function play() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            
+            // If we're at the last frame, restart
+            if (currentFrameIndex >= frameUrls.length - 1) {
+                currentFrameIndex = 0;
+            }
+            
+            intervalId = setInterval(() => {
+                // Move to next frame
+                currentFrameIndex++;
+                displayFrame(currentFrameIndex);
+                
+                // Stop when reaching the end
+                if (currentFrameIndex >= frameUrls.length - 1) {
+                    clearInterval(intervalId);
+                    isPlaying = false;
+                }
+            }, frameDuration);
+        }
+        
+        // Pause the sequence
+        function pause() {
+            if (!isPlaying) return;
+            
+            clearInterval(intervalId);
+            isPlaying = false;
+        }
+        
+        // Restart the sequence
+        function restart() {
+            pause();
+            currentFrameIndex = 0;
+            displayFrame(currentFrameIndex);
+        }
+        
+        // Event listeners
+        playBtn.addEventListener('click', play);
+        pauseBtn.addEventListener('click', pause);
+        restartBtn.addEventListener('click', restart);
+        
+        // Initialize
+        preloadImages();
+    </script>
+</body>
+</html>
